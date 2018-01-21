@@ -34,6 +34,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
+    <OutputPath>..\Binaries\</OutputPath>
+    <DefineConstants>DEBUG;</DefineConstants>
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>TRACE;DEBUG;ENABLE_PROFILER</DefineConstants>
     <DebugType>full</DebugType>
@@ -43,7 +45,7 @@
     <LangVersion>6</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
-    <OutputPath>bin\Release\</OutputPath>
+    <OutputPath>$(SolutionDir)\Binaries\</OutputPath>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>BasicCorrectnessRules.ruleset</CodeAnalysisRuleSet>
@@ -61,6 +63,7 @@
     </Reference>
     <Reference Include="KSPAssets, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Dependencies\KSPAssets.dll</HintPath>
       <HintPath>LocalDev\Refs\KSPAssets.dll</HintPath>
     </Reference>
     <Reference Include="System" />
@@ -71,6 +74,7 @@
     </Reference>
     <Reference Include="UnityEngine.UI, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
+      <HintPath>G:\GAMES\KERBAL\Kerbal Space Program_DEV_13\KSP_x64_Data\Managed\UnityEngine.UI.dll</HintPath>
       <HintPath>LocalDev\Refs\UnityEngine.UI.dll</HintPath>
     </Reference>
   </ItemGroup>
@@ -166,6 +170,10 @@
       <Project>{A6F1753E-9570-4C40-AF72-A179890582E5}</Project>
       <Name>BDArmory.Core</Name>
     </ProjectReference>
+    <ProjectReference Include="..\BDArmory.Events\BDArmory.Events.csproj">
+      <Project>{6DB74D09-78D4-4579-B63C-BEB4EFF21D25}</Project>
+      <Name>BDArmory.Events</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Shaders\GrayscaleEffectShader.shader" />
@@ -177,7 +185,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\rcsShader.shader" />
-    <None Include="packages.config" />
   </ItemGroup>
   <PropertyGroup>
     <PostBuildEvent>@echo $(Targetname)
@@ -190,15 +197,15 @@ set /p ZA_DIR=&lt;"$(ProjectDir)LocalDev\7za_dir.txt"
 set /p DIST_DIR=&lt;"$(ProjectDir)LocalDev\dist_dir.txt"
 
 @echo Copying assemblies to Distribution $(Targetname) files...
-copy /Y "$(TargetDir)"BDArmory*.dll "$(ProjectDir)Distribution\GameData\%25ModName%25\Plugins\"
+copy /Y "$(SolutionDir)"Binaries\BDArmory*.dll "$(ProjectDir)Distribution\GameData\%25ModName%25\Plugins\"
 
 if $(ConfigurationName) == Debug (
 @echo building debug files and symbols...
-FOR %25%25A IN ("$(TargetDir)"BDArmory*.dll) DO (
+FOR %25%25A IN ("$(SolutionDir)"Binaries\BDArmory*.dll) DO (
 call "%25PDB2MDB_EXE%25" %25%25A
 )
-copy /Y "$(TargetDir)"BDArmory*.dll.mdb "%25KSP_DIR%25\GameData\%25ModName%25\Plugins\"
-copy /Y "$(TargetDir)"BDArmory*.pdb "%25KSP_DIR%25\GameData\%25ModName%25\Plugins\"
+copy /Y "$(SolutionDir)"Binaries\BDArmory*.dll.mdb "%25KSP_DIR%25\GameData\%25ModName%25\Plugins\"
+copy /Y "$(SolutionDir)"Binaries\BDArmory*.pdb "%25KSP_DIR%25\GameData\%25ModName%25\Plugins\"
 )
 
 @echo deleting previous build ...
