@@ -27,6 +27,10 @@ namespace BDArmory.Modules
         public static ObjectPool bulletPool;
         public static ObjectPool shellPool;
 
+        [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "finalTarget Modifier"),
+         UI_FloatRange(controlEnabled = true, scene = UI_Scene.All, minValue = 0, maxValue = 2, stepIncrement = 0.05f)]
+        public float ftModifier = 0.5f;
+
         Coroutine startupRoutine;
         Coroutine shutdownRoutine;
 
@@ -100,7 +104,7 @@ namespace BDArmory.Modules
 
         public Vector3? FiringSolutionVector => finalAimTarget.IsZero() ? (Vector3?)null : (finalAimTarget - fireTransforms[0].position).normalized;
 
-        public bool recentlyFiring //used by guard to know if it should evaid this
+        public bool recentlyFiring //used by guard to know if it should evade this
         {
             get { return Time.time - timeFired < 1; }
         }
@@ -112,6 +116,7 @@ namespace BDArmory.Modules
         private ProtoStageIconInfo heatGauge;
        
         //AI will fire gun if target is within this Cos(angle) of barrel
+        [KSPField(isPersistant = true)]
         public float maxAutoFireCosAngle = 0.9993908f; //corresponds to ~2 degrees
 
         //aimer textures
@@ -1574,11 +1579,12 @@ namespace BDArmory.Modules
             targetDistance = Vector3.Distance(finalTarget, transform.position);
             targetLeadDistance = targetDistance;
 
-            if ((BDArmorySettings.AIM_ASSIST || aiControlled) && eWeaponType != WeaponTypes.Laser)
+            if ((BDArmorySettings.AIM_ASSIST || aiControlled) && (eWeaponType != WeaponTypes.Laser || BDArmorySettings.AI_LASER_MODE))
             {
                 float effectiveVelocity = bulletVelocity;
 
                 int iterations = 4;
+                if (BDArmorySettings.AI_SINGLE_PASS) iterations = 0;
                 while (--iterations >= 0)
                 {
                     float time = targetDistance / effectiveVelocity;
@@ -1604,16 +1610,16 @@ namespace BDArmory.Modules
                                 * time * time);
                             var cosine = Vector3d.Dot(finalTargetGeeForce.normalized, geeForceAtTarget.normalized);
                             var avGeeForce = (finalTargetGeeForce + geeForceAtTarget) / 2 / (2 * cosine * cosine - 1);
-                            finalTarget += 0.5f * (targetAcceleration - geeForceAtTarget + avGeeForce) * time * time;
+                            finalTarget += ftModifier * (targetAcceleration - geeForceAtTarget + avGeeForce) * time * time;
                         }
                         else
-                            finalTarget += 0.5f * targetAcceleration * time * time; //target acceleration
+                            finalTarget += ftModifier * targetAcceleration * time * time; //target acceleration
 
                         #if DEBUG
                         accAdj = (finalTarget - vc);
                         #endif
                     }
-                    else if (vessel.altitude < 6000)
+                    if (vessel.altitude < 6000 && BDArmorySettings.AI_LOW_ALT)  // why the else if?  testing
                     {
                         float time2 = VectorUtils.CalculateLeadTime(finalTarget - fireTransforms[0].position,
                             -(part.rb.velocity + Krakensbane.GetFrameVelocityV3f()), effectiveVelocity);
@@ -1627,9 +1633,8 @@ namespace BDArmory.Modules
                         #if DEBUG
                         var vc = finalTarget;
                         #endif
-                        float gAccel = ((float)FlightGlobals.getGeeForceAtPosition(finalTarget).magnitude
-                        + (float)FlightGlobals.getGeeForceAtPosition(fireTransforms[0].position).magnitude) / 2;
-                        Vector3 intermediateTarget = finalTarget + (0.5f * gAccel * time * time * up); //gravity compensation, -fixedDeltaTime is for fixedUpdate granularity
+                        float gAccel = ((float)FlightGlobals.getGeeForceAtPosition(finalTarget).magnitude + (float)FlightGlobals.getGeeForceAtPosition(fireTransforms[0].position).magnitude) / 2;
+                        Vector3 intermediateTarget = finalTarget + (ftModifier * gAccel * time * time * up); //gravity compensation, -fixedDeltaTime is for fixedUpdate granularity
 
                         var avGrav = (FlightGlobals.getGeeForceAtPosition(finalTarget) + FlightGlobals.getGeeForceAtPosition(fireTransforms[0].position)) / 2;
                         effectiveVelocity = bulletVelocity

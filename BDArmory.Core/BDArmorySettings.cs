@@ -57,5 +57,14 @@ namespace BDArmory.Core
         [BDAPersistantSettingsField] public static int MAX_FIRES_PER_VESSEL = 10;                   //controls fx for penetration only for landed or splashed
         [BDAPersistantSettingsField] public static float FIRELIFETIME_IN_SECONDS = 90f;             //controls fx for penetration only for landed or splashed
         [BDAPersistantSettingsField] public static bool PERFORMANCE_LOGGING = false;
+
+        [BDAPersistantSettingsField] public static bool AI_LASER_MODE = false;
+        [BDAPersistantSettingsField] public static bool AI_SINGLE_PASS = false;
+        [BDAPersistantSettingsField] public static bool AI_GFORCE = true;
+        [BDAPersistantSettingsField] public static bool AI_LOW_ALT = true;
+        [BDAPersistantSettingsField] public static bool AI_S = false;
+        [BDAPersistantSettingsField] public static bool AI_SI = false;
+        [BDAPersistantSettingsField] public static bool AI_SIN = false;
+
     }
 }

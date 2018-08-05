@@ -99,7 +99,7 @@ namespace BDArmory.Misc
             const float a4 = -1.453152027f;
             const float a5 = 1.061405429f;
             const float p = 0.3275911f;
-            const float invsqrt2 = 0.70710678118654752440084436210485f;
+            const float invsqrt2 = 1; //0.70710678118654752440084436210485f;
 
             float x = UnityEngine.Random.Range(-invsqrt2, invsqrt2);
             int sign = Math.Sign(x);

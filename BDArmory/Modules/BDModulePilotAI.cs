@@ -306,7 +306,8 @@ namespace BDArmory.Modules
 			useVelRollTarget = false;
 
 
-			if(vessel.LandedOrSplashed && standbyMode && weaponManager && (BDATargetManager.GetClosestTarget(this.weaponManager) == null || BDArmorySettings.PEACE_MODE)) //TheDog: replaced querying of targetdatabase with actual check if a target can be detected
+			//TheDog: replaced querying of targetdatabase with actual check if a target can be detected
+			if(vessel.LandedOrSplashed && standbyMode && weaponManager && (BDATargetManager.GetClosestTarget(this.weaponManager) == null || BDArmorySettings.PEACE_MODE))
 			{
 				//s.mainThrottle = 0;
 				//vessel.ActionGroups.SetGroup(KSPActionGroup.Brakes, true);

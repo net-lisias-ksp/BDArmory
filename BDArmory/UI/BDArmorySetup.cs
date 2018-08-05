@@ -1335,6 +1335,7 @@ namespace BDArmory.UI
         float settingsMargin;
 
         bool editKeys;
+        bool editAI;
 
         void SetupSettingsSize()
         {
@@ -1359,6 +1360,11 @@ namespace BDArmory.UI
             if (editKeys)
             {
                 InputSettings();
+                return;
+            }
+            if (editAI)
+            {
+                AISettings();
                 return;
             }
             BDArmorySettings.INSTAKILL = GUI.Toggle(SLeftRect(line), BDArmorySettings.INSTAKILL, "Instakill");
@@ -1497,6 +1503,12 @@ namespace BDArmory.UI
             if (GUI.Button(SLineRect(line), "Edit Inputs"))
             {
                 editKeys = true;
+            }
+            line++;
+            line++;
+            if (GUI.Button(SLineRect(line), "Troubleshoot AI"))
+            {
+                editAI = true;
             }
             line++;
             line++;
@@ -1667,6 +1679,39 @@ namespace BDArmory.UI
                 new Rect(
                     settingsMargin + (2*(settingsWidth - 2*settingsMargin)/3) + (settingsWidth - 2*settingsMargin)/6,
                     line*settingsLineHeight, (settingsWidth - (2*settingsMargin))/6, settingsLineHeight);
+        }
+
+        void AISettings()
+        {
+            float line = 1.25f;
+            int inputID = 0;
+            float origSettingsWidth = settingsWidth;
+            float origSettingsHeight = settingsHeight;
+            float origSettingsMargin = settingsMargin;
+
+            settingsWidth = origSettingsWidth - 28;
+            settingsMargin = 10;
+            Rect viewRect = new Rect(settingsMargin, 20, origSettingsWidth - 12, origSettingsHeight - 100);
+            Rect scrollerRect = new Rect(settingsMargin, 20, origSettingsWidth - 30, settingsHeight * 1.4f);
+
+            _displayViewerPosition = GUI.BeginScrollView(viewRect, _displayViewerPosition, scrollerRect, false, true);
+            BDArmorySettings.INSTAKILL = GUI.Toggle(SLeftRect(line), BDArmorySettings.INSTAKILL, "Instakill");
+            BDArmorySettings.INFINITE_AMMO = GUI.Toggle(SRightRect(line), BDArmorySettings.INFINITE_AMMO, "Infinite Ammo");
+            line++;
+            BDArmorySettings.BULLET_HITS = GUI.Toggle(SLeftRect(line), BDArmorySettings.BULLET_HITS, "Bullet Hits");
+            BDArmorySettings.EJECT_SHELLS = GUI.Toggle(SRightRect(line), BDArmorySettings.EJECT_SHELLS, "Eject Shells");
+            line++;
+            BDArmorySettings.AIM_ASSIST = GUI.Toggle(SLeftRect(line), BDArmorySettings.AIM_ASSIST, "Aim Assist");
+            BDArmorySettings.DRAW_AIMERS = GUI.Toggle(SRightRect(line), BDArmorySettings.DRAW_AIMERS, "Draw Aimers");
+            line++;
+            BDArmorySettings.DRAW_DEBUG_LINES = GUI.Toggle(SLeftRect(line), BDArmorySettings.DRAW_DEBUG_LINES, "Debug Lines");
+            BDArmorySettings.DRAW_DEBUG_LABELS = GUI.Toggle(SRightRect(line), BDArmorySettings.DRAW_DEBUG_LABELS, "Debug Labels");
+            line++;
+            BDArmorySettings.REMOTE_SHOOTING = GUI.Toggle(SLeftRect(line), BDArmorySettings.REMOTE_SHOOTING, "Remote Firing");
+            BDArmorySettings.BOMB_CLEARANCE_CHECK = GUI.Toggle(SRightRect(line), BDArmorySettings.BOMB_CLEARANCE_CHECK, "Clearance Check");
+            line++;
+
+
         }
 
         #endregion
