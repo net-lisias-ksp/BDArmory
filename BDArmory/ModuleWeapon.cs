@@ -17,6 +17,27 @@ namespace BDArmory
 {
     public class ModuleWeapon : EngageableWeapon, IBDWeapon
     {
+        [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "targetLeadDistance MOD"),
+         UI_FloatRange(minValue = 0.05f, maxValue = 5f, stepIncrement = 0.05f, scene = UI_Scene.All, affectSymCounterparts = UI_Scene.All)]
+        public float velModifier = 1f;
+
+        [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "fixedLeadOffset MOD"),
+         UI_FloatRange(minValue = 0.05f, maxValue = 5f, stepIncrement = 0.05f, scene = UI_Scene.All, affectSymCounterparts = UI_Scene.All)]
+        public float leadOffsetModifier = 1f;
+
+        [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "leadTiming MOD"),
+         UI_FloatRange(minValue = 0.05f, maxValue = 5f, stepIncrement = 0.05f, scene = UI_Scene.All, affectSymCounterparts = UI_Scene.All)]
+        public float leadTiming = 1f;
+
+
+        [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "finalTarget MOD"),
+         UI_FloatRange(minValue = 0.05f, maxValue = 5f, stepIncrement = 0.05f, scene = UI_Scene.All, affectSymCounterparts = UI_Scene.All)]
+        public float finalTargetMod = 0.5f;
+
+        [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "cosAngleMod MOD"),
+         UI_FloatRange(minValue = 0.05f, maxValue = 5f, stepIncrement = 0.05f, scene = UI_Scene.All, affectSymCounterparts = UI_Scene.All)]
+        public float cosAngleMod = 1f;
+
         #region Declarations
 
         #region Variables
@@ -845,7 +866,7 @@ namespace BDArmory
 
                     if (BDATargetManager.CheckSafeToFireGuns(weaponManager, aimDirection, 1000, 0.999848f) &&
                         //~1 degree of unsafe angle
-                        (targetCosAngle >= maxAutoFireCosAngle || //check if directly on target
+                        (targetCosAngle >= maxAutoFireCosAngle * cosAngleMod || //check if directly on target
                          (Vector3.Dot(targetDiffVec, targetRelPos) * Vector3.Dot(targetDiffVec, lastTargetRelPos) < 0 &&
                           targetCosAngle > 0))) //check if target will pass this point soon
                     {
@@ -1568,7 +1589,7 @@ namespace BDArmory
             Vector3 finalTarget = targetPosition;
             Vector3 originalTarget = targetPosition;
             targetDistance = Vector3.Distance(finalTarget, transform.position);
-            targetLeadDistance = targetDistance;
+            targetLeadDistance = targetDistance * velModifier;
 
             if ((BDArmorySettings.AIM_ASSIST || aiControlled) && eWeaponType != WeaponTypes.Laser)
             {
@@ -1577,14 +1598,14 @@ namespace BDArmory
                 int iterations = 4;
                 while (--iterations >= 0)
                 {
-                    float time = targetDistance / effectiveVelocity;
+                    float time = (targetDistance / effectiveVelocity) * leadTiming;
                     finalTarget = targetPosition;
                     
                     if (targetAcquired)
                     {
                         float time2 = VectorUtils.CalculateLeadTime(finalTarget - fireTransforms[0].position,
                             relativeVelocity, effectiveVelocity);
-                        if (time2 > 0) time = time2;
+                        if (time2 > 0) time = time2 * leadTiming;
                         finalTarget += relativeVelocity * time;
                         #if DEBUG
                         relVelAdj = relativeVelocity * time;
@@ -1595,15 +1616,15 @@ namespace BDArmory
                         if (weaponManager.currentTarget?.Vessel.InOrbit() == true)
                         {
                             var geeForceAtTarget = FlightGlobals.getGeeForceAtPosition(targetPosition);
-                            var finalTargetGeeForce = FlightGlobals.getGeeForceAtPosition(finalTarget + 0.5f * (targetAcceleration
+                            var finalTargetGeeForce = FlightGlobals.getGeeForceAtPosition(finalTarget + finalTargetMod * (targetAcceleration
                                 - (FlightGlobals.getGeeForceAtPosition(targetPosition) - FlightGlobals.getGeeForceAtPosition(finalTarget)) / 2)
                                 * time * time);
                             var cosine = Vector3d.Dot(finalTargetGeeForce.normalized, geeForceAtTarget.normalized);
                             var avGeeForce = (finalTargetGeeForce + geeForceAtTarget) / 2 / (2 * cosine * cosine - 1);
-                            finalTarget += 0.5f * (targetAcceleration - geeForceAtTarget + avGeeForce) * time * time;
+                            finalTarget += finalTargetMod * (targetAcceleration - geeForceAtTarget + avGeeForce) * time * time;
                         }
                         else
-                            finalTarget += 0.5f * targetAcceleration * time * time; //target acceleration
+                            finalTarget += finalTargetMod * targetAcceleration * time * time; //target acceleration
 
                         #if DEBUG
                         accAdj = (finalTarget - vc);
@@ -1613,7 +1634,7 @@ namespace BDArmory
                     {
                         float time2 = VectorUtils.CalculateLeadTime(finalTarget - fireTransforms[0].position,
                             -(part.rb.velocity + Krakensbane.GetFrameVelocityV3f()), effectiveVelocity);
-                        if (time2 > 0) time = time2;
+                        if (time2 > 0) time = time2 * leadTiming;
                         finalTarget += (-(part.rb.velocity + Krakensbane.GetFrameVelocityV3f()) * time);
                         //this vessel velocity compensation against stationary
                     }
@@ -1625,7 +1646,7 @@ namespace BDArmory
                         #endif
                         float gAccel = ((float)FlightGlobals.getGeeForceAtPosition(finalTarget).magnitude
                         + (float)FlightGlobals.getGeeForceAtPosition(fireTransforms[0].position).magnitude) / 2;
-                        Vector3 intermediateTarget = finalTarget + (0.5f * gAccel * time * time * up); //gravity compensation, -fixedDeltaTime is for fixedUpdate granularity
+                        Vector3 intermediateTarget = finalTarget + (finalTargetMod * gAccel * time * time * up); //gravity compensation, -fixedDeltaTime is for fixedUpdate granularity
 
                         var avGrav = (FlightGlobals.getGeeForceAtPosition(finalTarget) + FlightGlobals.getGeeForceAtPosition(fireTransforms[0].position)) / 2;
                         effectiveVelocity = bulletVelocity
@@ -1641,8 +1662,9 @@ namespace BDArmory
 
                 }
 
-                targetLeadDistance = Vector3.Distance(finalTarget, fireTransforms[0].position);
-                fixedLeadOffset = originalTarget - finalTarget; //for aiming fixed guns to moving target	
+                var _targetLeadDistance = Vector3.Distance(finalTarget, fireTransforms[0].position);
+                targetLeadDistance = _targetLeadDistance * velModifier;
+                fixedLeadOffset = (originalTarget - finalTarget) * leadOffsetModifier; //for aiming fixed guns to moving target	
 
                 //airdetonation
                 if (airDetonation)

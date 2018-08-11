@@ -556,7 +556,12 @@ namespace BDArmory.Control
 			return false;
 		}
 
-		void FlyToTargetVessel(FlightCtrlState s, Vessel v)
+
+        [KSPField(isPersistant = true, guiActive = true, guiActiveEditor = true, guiName = "Target Loc Magnifier MOD"),
+         UI_FloatRange(minValue = 0.05f, maxValue = 5f, stepIncrement = 0.05f, scene = UI_Scene.All, affectSymCounterparts = UI_Scene.All)]
+        public float magnifierMod = 0.75f;
+
+        void FlyToTargetVessel(FlightCtrlState s, Vessel v)
 		{
 			Vector3 target = v.CoM;
 			MissileBase missile = null;
@@ -624,8 +629,8 @@ namespace BDArmory.Control
                         debugString.Append($"targetAngVel: {targetAngVel}");
                         debugString.Append(Environment.NewLine);
                         float magnifier = Mathf.Clamp(targetAngVel, 1f, 2f);
-						magnifier += ((magnifier-1f) * Mathf.Sin(Time.time *0.75f));
-						target -= magnifier * leadOffset;
+						magnifier += ((magnifier-1f) * Mathf.Sin(Time.time * magnifierMod));
+                        target -= magnifier * leadOffset;
 
 						angleToTarget = Vector3.Angle(vesselTransform.up, target - vesselTransform.position);
 						if(distanceToTarget < weaponManager.gunRange && angleToTarget < 20)
