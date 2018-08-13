@@ -760,6 +760,7 @@ namespace BDArmory.Control
 		}
 
 		Vector3 prevTargetDir;
+        Vector3 debugPos;
 		bool useVelRollTarget;
 		void FlyToPosition(FlightCtrlState s, Vector3 targetPosition)
 		{
@@ -843,6 +844,7 @@ namespace BDArmory.Control
 				targetDirectionYaw = targetDirection;
 
 			}
+            debugPos = vessel.transform.position + (targetPosition - vesselTransform.position) * 5000;
 
 			pitchError = VectorUtils.SignedAngle(Vector3.up, Vector3.ProjectOnPlane(targetDirection, Vector3.right), Vector3.back);
 			yawError = VectorUtils.SignedAngle(Vector3.up, Vector3.ProjectOnPlane(targetDirectionYaw, Vector3.forward), Vector3.right);
@@ -1738,6 +1740,9 @@ namespace BDArmory.Control
 		    {
 		        BDGUIUtils.DrawLineBetweenWorldPositions(vesselTransform.position, debugFollowPosition, 2, Color.red);
 		    }
+
+            BDGUIUtils.DrawLineBetweenWorldPositions(vesselTransform.position, debugPos, 5, Color.red);
+            BDGUIUtils.DrawLineBetweenWorldPositions(vesselTransform.position, vesselTransform.position + vesselTransform.up * 5000, 3, Color.white);
 
 		    BDGUIUtils.DrawLineBetweenWorldPositions(vesselTransform.position, vesselTransform.position + rollTarget, 2, Color.blue);
 		    BDGUIUtils.DrawLineBetweenWorldPositions(vesselTransform.position + (0.05f * vesselTransform.right), vesselTransform.position + (0.05f * vesselTransform.right) + angVelRollTarget, 2, Color.green);
