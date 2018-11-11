@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -68,6 +68,22 @@
     </Reference>
     <Reference Include="UnityEngine.UI">
       <HintPath>..\..\_LocalDev\KSPRefs\UnityEngine.UI.dll</HintPath>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="Assembly-CSharp">
+      <HintPath>..\..\..\LIB\managed\1.4.1\Assembly-CSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="Assembly-CSharp-firstpass">
+      <HintPath>..\..\..\LIB\managed\1.4.1\Assembly-CSharp-firstpass.dll</HintPath>
+    </Reference>
+    <Reference Include="KSPAssets">
+      <HintPath>..\..\..\LIB\managed\1.4.1\KSPAssets.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine">
+      <HintPath>..\..\..\LIB\managed\1.4.1\UnityEngine.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>..\..\..\LIB\managed\1.4.1\UnityEngine.UI.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -655,7 +671,7 @@ xcopy /E /Y "$(ProjectDir)Distribution\GameData" "%25KSP_DIR%25\GameData"
       <Output TaskParameter="Assemblies" ItemName="Targets" />
     </GetAssemblyIdentity>
     <ItemGroup>
-      <VersionNumber Include="@(Targets->'%(Version)')" />
+      <VersionNumber Include="@(Targets-&gt;'%(Version)')" />
     </ItemGroup>
   </Target>
   <PropertyGroup>
@@ -666,6 +682,23 @@ xcopy /E /Y "$(ProjectDir)Distribution\GameData" "%25KSP_DIR%25\GameData"
   </PropertyGroup>
   <PropertyGroup>
     <PreBuildEvent>
+#@echo $(Targetname)
+#SET ModName=BDArmory
+#@echo ...
+#@echo set lpath vars from LocalDev storage...
+#set /p KSP_DIR=&lt;"$(ProjectDir)LocalDev\ksp_dir.txt"
+#set /p PDB2MDB_EXE=&lt;"$(ProjectDir)LocalDev\pdb2mdb_exe.txt"
+#set /p ZA_DIR=&lt;"$(ProjectDir)LocalDev\7za_dir.txt"
+#set /p DIST_DIR=&lt;"$(ProjectDir)LocalDev\dist_dir.txt"
+
+#@echo Copying KSP assemblies from "%25KSP_DIR%25\KSP_x64_Data\Managed" to "$(ProjectDir)LocalDev\Refs" folder...
+#copy /Y "%25KSP_DIR%25\KSP_x64_Data\Managed\Assembly-CSharp.dll" "$(ProjectDir)LocalDev\Refs"
+#copy /Y "%25KSP_DIR%25\KSP_x64_Data\Managed\Assembly-CSharp-firstpass.dll" "$(ProjectDir)LocalDev\Refs"
+#copy /Y "%25KSP_DIR%25\KSP_x64_Data\Managed\KSPAssets.dll" "$(ProjectDir)LocalDev\Refs"
+#copy /Y "%25KSP_DIR%25\KSP_x64_Data\Managed\UnityEngine.dll" "$(ProjectDir)LocalDev\Refs"
+#copy /Y "%25KSP_DIR%25\KSP_x64_Data\Managed\UnityEngine.UI.dll" "$(ProjectDir)LocalDev\Refs"
+
+#@echo KSP API references copying complete!
     </PreBuildEvent>
   </PropertyGroup>
 </Project>
